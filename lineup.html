@@ -56,10 +56,10 @@ body {
 .roster-hd { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:var(--fg2); align-self:center; }
 .rc {
   display:inline-flex; align-items:center; gap:5px;
-  padding:3px 9px 3px 4px; border-radius:20px; font-size:11px; font-weight:600;
+  padding:4px 10px 4px 4px; border-radius:20px; font-size:13px; font-weight:600;
 }
 .rc-av {
-  width:18px; height:18px; border-radius:50%; object-fit:cover; object-position:top;
+  width:20px; height:20px; border-radius:50%; object-fit:cover; object-position:top;
   border:1.5px solid rgba(0,0,0,.08); flex-shrink:0;
 }
 
@@ -96,9 +96,9 @@ td { padding:6px 10px; vertical-align:middle; }
 
 /* Chip with avatar */
 .chip {
-  display:inline-flex; align-items:center; gap:3px;
-  padding:2px 5px 2px 2px; border-radius:20px;
-  font-size:11px; font-weight:600;
+  display:inline-flex; align-items:center; gap:4px;
+  padding:3px 7px 3px 3px; border-radius:20px;
+  font-size:13px; font-weight:600;
   cursor:grab; user-select:none; border:none; line-height:1;
   transition:box-shadow .12s;
 }
@@ -106,8 +106,8 @@ td { padding:6px 10px; vertical-align:middle; }
 .chip.sortable-ghost { opacity:.3; }
 .chip.sortable-chosen { box-shadow:0 2px 8px rgba(0,0,0,.18); z-index:1; }
 .chip-av {
-  width:15px; height:15px; border-radius:50%; object-fit:cover; object-position:top;
-  border:1px solid rgba(0,0,0,.08); flex-shrink:0;
+  width:20px; height:20px; border-radius:50%; object-fit:cover; object-position:top;
+  border:1.5px solid rgba(0,0,0,.08); flex-shrink:0;
 }
 .chip-ord {
   display:inline-flex; align-items:center; justify-content:center;
@@ -124,16 +124,16 @@ td { padding:6px 10px; vertical-align:middle; }
 .chip-x:hover { background:rgba(0,0,0,.22); }
 
 .chip-ghost {
-  display:inline-flex; align-items:center; gap:3px;
-  padding:2px 7px 2px 2px; border-radius:20px;
-  font-size:11px; font-weight:500;
+  display:inline-flex; align-items:center; gap:4px;
+  padding:3px 8px 3px 3px; border-radius:20px;
+  font-size:13px; font-weight:500;
   cursor:pointer; border:1.5px dashed var(--border);
   color:var(--fg2); background:transparent; line-height:1;
   transition:border-color .12s, color .12s;
 }
 .chip-ghost:hover { border-color:var(--accent); color:var(--accent); }
 .chip-ghost-av {
-  width:14px; height:14px; border-radius:50%; object-fit:cover; object-position:top;
+  width:20px; height:20px; border-radius:50%; object-fit:cover; object-position:top;
   opacity:.45; flex-shrink:0; filter:grayscale(1);
 }
 .chip-ghost:hover .chip-ghost-av { opacity:.7; filter:grayscale(0); }
