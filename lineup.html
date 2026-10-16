@@ -150,54 +150,6 @@ td { padding:6px 10px; vertical-align:middle; }
   font-family:'DM Sans',sans-serif; transition:opacity .13s;
 }
 .btn:hover { opacity:.75; }
-.btn-save {
-  padding:7px 14px; border-radius:7px; font-size:12px; font-weight:600; cursor:pointer;
-  border:1.5px solid var(--accent); background:transparent; color:var(--accent);
-  font-family:'DM Sans',sans-serif; transition:opacity .13s;
-}
-.btn-save:hover { opacity:.75; }
-
-/* Save panel */
-.save-panel {
-  max-width:900px; margin-top:8px;
-  background:var(--surface); border:1px solid var(--border); border-radius:var(--r);
-  overflow:hidden;
-}
-.save-panel[hidden] { display:none!important; }
-.save-input-row {
-  display:flex; gap:6px; padding:8px 10px;
-  border-bottom:1px solid var(--border);
-}
-.save-name-input {
-  flex:1; padding:5px 9px; border-radius:6px; font-size:12px;
-  border:1.5px solid var(--border); background:var(--surface2); color:var(--fg);
-  font-family:'DM Sans',sans-serif; outline:none; transition:border-color .13s;
-}
-.save-name-input:focus { border-color:var(--accent); }
-.save-name-input::placeholder { color:var(--fg2); opacity:.6; }
-.btn-do-save {
-  padding:5px 12px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;
-  border:none; background:var(--accent); color:#fff;
-  font-family:'DM Sans',sans-serif; white-space:nowrap; transition:opacity .13s;
-}
-.btn-do-save:hover { opacity:.8; }
-.saves-list { padding:4px 0; }
-.save-row {
-  display:flex; align-items:center; gap:6px;
-  padding:6px 10px; cursor:pointer; transition:background .1s;
-}
-.save-row:hover { background:var(--surface2); }
-.save-row-info { flex:1; min-width:0; }
-.save-row-name { font-size:12px; font-weight:600; }
-.save-row-time { font-size:10px; color:var(--fg2); margin-top:1px; }
-.save-row-del {
-  width:20px; height:20px; border-radius:50%; border:none; background:transparent;
-  color:var(--fg2); font-size:12px; cursor:pointer; display:flex; align-items:center;
-  justify-content:center; padding:0; flex-shrink:0; transition:background .12s, color .12s;
-  font-family:inherit;
-}
-.save-row-del:hover { background:rgba(226,66,24,.12); color:var(--accent); }
-.saves-empty { padding:10px; font-size:11px; color:var(--fg2); text-align:center; }
 #toast {
   position:fixed; bottom:max(16px,env(safe-area-inset-bottom,0px));
   left:50%; transform:translateX(-50%) translateY(60px);
@@ -223,17 +175,7 @@ td { padding:6px 10px; vertical-align:middle; }
 </div>
 <div class="actions">
   <button class="btn" onclick="copyLineup()">📋 複製棒次</button>
-  <button class="btn" id="reset-btn" onclick="resetLineup()">↺ 重置預設</button>
-  <button class="btn-save" onclick="toggleSavePanel()">💾 儲存棒次</button>
   <span id="sync-status" style="font-size:11px;color:var(--fg2);margin-left:4px;">☁ 連線中…</span>
-</div>
-
-<div class="save-panel" id="save-panel" hidden>
-  <div class="save-input-row">
-    <input class="save-name-input" id="save-name" type="text" placeholder="替這份棒次命名…" maxlength="20">
-    <button class="btn-do-save" onclick="doSave()">儲存</button>
-  </div>
-  <div class="saves-list" id="saves-list"></div>
 </div>
 
 <div id="toast"></div>
@@ -263,7 +205,6 @@ const DEFAULTS = [
 ];
 
 let state = clone(DEFAULTS);
-let resetPending = false, resetTid;
 function clone(x) { return JSON.parse(JSON.stringify(x)); }
 const API_URL = 'https://script.google.com/macros/s/AKfycbxP-7rVXmsG7m1yRMeteC9ifAuVJv7TiGj0Bqw2JWr3gaua3xTSmJpZUI3mDX38XwWw/exec';
 
@@ -415,92 +356,6 @@ function toast(msg) {
   toastTid=setTimeout(()=>el.classList.remove('show'),2500);
 }
 
-function resetLineup() {
-  const btn=document.getElementById('reset-btn');
-  if(!resetPending) {
-    resetPending=true; btn.textContent='再按確認'; btn.style.color='var(--accent)';
-    resetTid=setTimeout(()=>{ resetPending=false; btn.textContent='↺ 重置預設'; btn.style.color=''; },3000);
-  } else {
-    clearTimeout(resetTid); resetPending=false; btn.textContent='↺ 重置預設'; btn.style.color='';
-    state=clone(DEFAULTS); save(); renderTable(); toast('已還原為預設棒次');
-  }
-}
-
-// ── Save / Load feature ──────────────────────────────
-const SAVES_KEY = 'steel-saves-v1';
-
-function loadSaves() {
-  try { return JSON.parse(localStorage.getItem(SAVES_KEY)) || []; } catch(_) { return []; }
-}
-function persistSaves(arr) {
-  try { localStorage.setItem(SAVES_KEY, JSON.stringify(arr)); } catch(_) {}
-}
-
-function toggleSavePanel() {
-  const panel = document.getElementById('save-panel');
-  panel.hidden = !panel.hidden;
-  if (!panel.hidden) {
-    renderSaves();
-    setTimeout(() => document.getElementById('save-name').focus(), 50);
-  }
-}
-
-function doSave() {
-  const nameEl = document.getElementById('save-name');
-  const name = nameEl.value.trim() || `配置 ${new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'})}`;
-  const saves = loadSaves();
-  saves.unshift({ name, ts: Date.now(), state: clone(state) });
-  persistSaves(saves);
-  nameEl.value = '';
-  renderSaves();
-  toast(`✓ 已儲存「${name}」`);
-}
-
-function loadSave(i) {
-  const saves = loadSaves();
-  if (!saves[i]) return;
-  state = clone(saves[i].state);
-  save(); renderTable();
-  toast(`✓ 已載入「${saves[i].name}」`);
-}
-
-function deleteSave(i, e) {
-  e.stopPropagation();
-  const saves = loadSaves();
-  const name = saves[i]?.name || '';
-  saves.splice(i, 1);
-  persistSaves(saves);
-  renderSaves();
-  toast(`已刪除「${name}」`);
-}
-
-function renderSaves() {
-  const list = document.getElementById('saves-list');
-  const saves = loadSaves();
-  if (!saves.length) {
-    list.innerHTML = '<div class="saves-empty">還沒有儲存的棒次</div>';
-    return;
-  }
-  list.innerHTML = '';
-  saves.forEach((s, i) => {
-    const row = document.createElement('div');
-    row.className = 'save-row';
-    row.onclick = () => loadSave(i);
-    const dt = new Date(s.ts).toLocaleString('zh-TW', { month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit' });
-    row.innerHTML = `
-      <div class="save-row-info">
-        <div class="save-row-name">${s.name}</div>
-        <div class="save-row-time">${dt}</div>
-      </div>
-      <button class="save-row-del" title="刪除">×</button>`;
-    row.querySelector('.save-row-del').onclick = (e) => deleteSave(i, e);
-    list.appendChild(row);
-  });
-}
-
-document.getElementById('save-name').addEventListener('keydown', e => {
-  if (e.key === 'Enter') doSave();
-});
 
 async function initLoad() {
   load(); renderRoster(); renderTable();
