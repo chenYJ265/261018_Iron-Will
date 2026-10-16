@@ -265,7 +265,7 @@ const DEFAULTS = [
 let state = clone(DEFAULTS);
 let resetPending = false, resetTid;
 function clone(x) { return JSON.parse(JSON.stringify(x)); }
-const API_URL = 'https://script.google.com/macros/s/AKfycbyTD4n59nsvhqO3FL1vJPZfOJ0sGCwchhe3A6uEElvOl4eS8ygNtlYVnf_Ta0ukzI0V/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbxP-7rVXmsG7m1yRMeteC9ifAuVJv7TiGj0Bqw2JWr3gaua3xTSmJpZUI3mDX38XwWw/exec';
 
 function load() { try { const s=localStorage.getItem('steel-lineup-v5'); if(s) state=JSON.parse(s); } catch(_){} }
 function save() {
@@ -279,7 +279,8 @@ function pushToCloud() {
   clearTimeout(pushTid);
   pushTid = setTimeout(async () => {
     try {
-      await fetch(API_URL, { method:'POST', body:JSON.stringify(state), mode:'no-cors' });
+      const url = API_URL + '?data=' + encodeURIComponent(JSON.stringify(state));
+      await fetch(url, { mode:'no-cors' });
       setSyncStatus('ok');
     } catch(_) { setSyncStatus('err'); }
   }, 1000);
