@@ -59,7 +59,7 @@ body {
   padding:3px 9px 3px 4px; border-radius:20px; font-size:11px; font-weight:600;
 }
 .rc-av {
-  width:22px; height:22px; border-radius:50%; object-fit:cover; object-position:top;
+  width:18px; height:18px; border-radius:50%; object-fit:cover; object-position:top;
   border:1.5px solid rgba(0,0,0,.08); flex-shrink:0;
 }
 
@@ -106,8 +106,8 @@ td { padding:6px 10px; vertical-align:middle; }
 .chip.sortable-ghost { opacity:.3; }
 .chip.sortable-chosen { box-shadow:0 2px 8px rgba(0,0,0,.18); z-index:1; }
 .chip-av {
-  width:20px; height:20px; border-radius:50%; object-fit:cover; object-position:top;
-  border:1.5px solid rgba(0,0,0,.08); flex-shrink:0;
+  width:15px; height:15px; border-radius:50%; object-fit:cover; object-position:top;
+  border:1px solid rgba(0,0,0,.08); flex-shrink:0;
 }
 .chip-ord {
   display:inline-flex; align-items:center; justify-content:center;
@@ -133,7 +133,7 @@ td { padding:6px 10px; vertical-align:middle; }
 }
 .chip-ghost:hover { border-color:var(--accent); color:var(--accent); }
 .chip-ghost-av {
-  width:18px; height:18px; border-radius:50%; object-fit:cover; object-position:top;
+  width:14px; height:14px; border-radius:50%; object-fit:cover; object-position:top;
   opacity:.45; flex-shrink:0; filter:grayscale(1);
 }
 .chip-ghost:hover .chip-ghost-av { opacity:.7; filter:grayscale(0); }
@@ -143,13 +143,61 @@ td { padding:6px 10px; vertical-align:middle; }
 .c2 { background:var(--c2b); color:var(--c2); }
 .c3 { background:var(--c3b); color:var(--c3); }
 
-.actions { margin-top:8px; display:flex; gap:7px; max-width:600px; flex-wrap:wrap; }
+.actions { margin-top:8px; display:flex; gap:7px; max-width:600px; flex-wrap:wrap; align-items:center; }
 .btn {
   padding:7px 14px; border-radius:7px; font-size:12px; font-weight:600; cursor:pointer;
   border:1.5px solid var(--border); background:transparent; color:var(--fg2);
   font-family:'DM Sans',sans-serif; transition:opacity .13s;
 }
 .btn:hover { opacity:.75; }
+.btn-save {
+  padding:7px 14px; border-radius:7px; font-size:12px; font-weight:600; cursor:pointer;
+  border:1.5px solid var(--accent); background:transparent; color:var(--accent);
+  font-family:'DM Sans',sans-serif; transition:opacity .13s;
+}
+.btn-save:hover { opacity:.75; }
+
+/* Save panel */
+.save-panel {
+  max-width:600px; margin-top:8px;
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--r);
+  overflow:hidden;
+}
+.save-panel[hidden] { display:none!important; }
+.save-input-row {
+  display:flex; gap:6px; padding:8px 10px;
+  border-bottom:1px solid var(--border);
+}
+.save-name-input {
+  flex:1; padding:5px 9px; border-radius:6px; font-size:12px;
+  border:1.5px solid var(--border); background:var(--surface2); color:var(--fg);
+  font-family:'DM Sans',sans-serif; outline:none; transition:border-color .13s;
+}
+.save-name-input:focus { border-color:var(--accent); }
+.save-name-input::placeholder { color:var(--fg2); opacity:.6; }
+.btn-do-save {
+  padding:5px 12px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;
+  border:none; background:var(--accent); color:#fff;
+  font-family:'DM Sans',sans-serif; white-space:nowrap; transition:opacity .13s;
+}
+.btn-do-save:hover { opacity:.8; }
+.saves-list { padding:4px 0; }
+.save-row {
+  display:flex; align-items:center; gap:6px;
+  padding:6px 10px; cursor:pointer; transition:background .1s;
+}
+.save-row:hover { background:var(--surface2); }
+.save-row-info { flex:1; min-width:0; }
+.save-row-name { font-size:12px; font-weight:600; }
+.save-row-time { font-size:10px; color:var(--fg2); margin-top:1px; }
+.save-row-del {
+  width:20px; height:20px; border-radius:50%; border:none; background:transparent;
+  color:var(--fg2); font-size:12px; cursor:pointer; display:flex; align-items:center;
+  justify-content:center; padding:0; flex-shrink:0; transition:background .12s, color .12s;
+  font-family:inherit;
+}
+.save-row-del:hover { background:rgba(226,66,24,.12); color:var(--accent); }
+.saves-empty { padding:10px; font-size:11px; color:var(--fg2); text-align:center; }
 #toast {
   position:fixed; bottom:max(16px,env(safe-area-inset-bottom,0px));
   left:50%; transform:translateX(-50%) translateY(60px);
@@ -176,7 +224,17 @@ td { padding:6px 10px; vertical-align:middle; }
 <div class="actions">
   <button class="btn" onclick="copyLineup()">📋 複製棒次</button>
   <button class="btn" id="reset-btn" onclick="resetLineup()">↺ 重置預設</button>
+  <button class="btn-save" onclick="toggleSavePanel()">💾 儲存棒次</button>
 </div>
+
+<div class="save-panel" id="save-panel" hidden>
+  <div class="save-input-row">
+    <input class="save-name-input" id="save-name" type="text" placeholder="替這份棒次命名…" maxlength="20">
+    <button class="btn-do-save" onclick="doSave()">儲存</button>
+  </div>
+  <div class="saves-list" id="saves-list"></div>
+</div>
+
 <div id="toast"></div>
 <script>
 const AVATARS = [
@@ -340,6 +398,82 @@ function resetLineup() {
     state=clone(DEFAULTS); save(); renderTable(); toast('已還原為預設棒次');
   }
 }
+
+// ── Save / Load feature ──────────────────────────────
+const SAVES_KEY = 'steel-saves-v1';
+
+function loadSaves() {
+  try { return JSON.parse(localStorage.getItem(SAVES_KEY)) || []; } catch(_) { return []; }
+}
+function persistSaves(arr) {
+  try { localStorage.setItem(SAVES_KEY, JSON.stringify(arr)); } catch(_) {}
+}
+
+function toggleSavePanel() {
+  const panel = document.getElementById('save-panel');
+  panel.hidden = !panel.hidden;
+  if (!panel.hidden) {
+    renderSaves();
+    setTimeout(() => document.getElementById('save-name').focus(), 50);
+  }
+}
+
+function doSave() {
+  const nameEl = document.getElementById('save-name');
+  const name = nameEl.value.trim() || `配置 ${new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'})}`;
+  const saves = loadSaves();
+  saves.unshift({ name, ts: Date.now(), state: clone(state) });
+  persistSaves(saves);
+  nameEl.value = '';
+  renderSaves();
+  toast(`✓ 已儲存「${name}」`);
+}
+
+function loadSave(i) {
+  const saves = loadSaves();
+  if (!saves[i]) return;
+  state = clone(saves[i].state);
+  save(); renderTable();
+  toast(`✓ 已載入「${saves[i].name}」`);
+}
+
+function deleteSave(i, e) {
+  e.stopPropagation();
+  const saves = loadSaves();
+  const name = saves[i]?.name || '';
+  saves.splice(i, 1);
+  persistSaves(saves);
+  renderSaves();
+  toast(`已刪除「${name}」`);
+}
+
+function renderSaves() {
+  const list = document.getElementById('saves-list');
+  const saves = loadSaves();
+  if (!saves.length) {
+    list.innerHTML = '<div class="saves-empty">還沒有儲存的棒次</div>';
+    return;
+  }
+  list.innerHTML = '';
+  saves.forEach((s, i) => {
+    const row = document.createElement('div');
+    row.className = 'save-row';
+    row.onclick = () => loadSave(i);
+    const dt = new Date(s.ts).toLocaleString('zh-TW', { month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit' });
+    row.innerHTML = `
+      <div class="save-row-info">
+        <div class="save-row-name">${s.name}</div>
+        <div class="save-row-time">${dt}</div>
+      </div>
+      <button class="save-row-del" title="刪除">×</button>`;
+    row.querySelector('.save-row-del').onclick = (e) => deleteSave(i, e);
+    list.appendChild(row);
+  });
+}
+
+document.getElementById('save-name').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doSave();
+});
 
 load(); renderRoster(); renderTable();
 </script>
