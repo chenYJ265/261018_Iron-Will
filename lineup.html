@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>鋼鐵大賽棒次</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap"
+        rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <style>
+        :root {
+            --bg: #eeecea;
+            --surface: #ffffff;
+            --surface2: #f5f3f0;
+            --fg: #141210;
+            --fg2: #706b64;
+            --border: #dedad4;
+            --accent: #e24218;
+            --r: 10px;
+            --c0: #c83a12;
+            --c0b: #fdeee8;
+            --c1: #2061c4;
+            --c1b: #e6eef9;
+            --c2: #a96b00;
+            --c2b: #fdf3de;
+            --c3: #1a8c50;
+            --c3b: #e2f5ea;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) {
+                --bg: #111010;
+                --surface: #1c1b1a;
+                --surface2: #252321;
+                --fg: #f0ece6;
+                --fg2: #8a847c;
+                --border: #2e2b28;
+                --accent: #f05530;
+                --c0: #f06040;
+                --c0b: #2a1008;
+                --c1: #5086e8;
+                --c1b: #0a1626;
+                --c2: #d4920a;
+                --c2b: #221608;
+                --c3: #38c46a;
+                --c3b: #082214;
+                color-scheme: dark;
+            }
+        }
+
+        :root[data-theme="dark"] {
+            --bg: #111010;
+            --surface: #1c1b1a;
+            --surface2: #252321;
+            --fg: #f0ece6;
+            --fg2: #8a847c;
+            --border: #2e2b28;
+            --accent: #f05530;
+            --c0: #f06040;
+            --c0b: #2a1008;
+            --c1: #5086e8;
+            --c1b: #0a1626;
+            --c2: #d4920a;
+            --c2b: #221608;
+            --c3: #38c46a;
+            --c3b: #082214;
+            color-scheme: dark;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--fg);
+            font-family: 'DM Sans', system-ui, sans-serif;
+            padding-left: max(12px, env(safe-area-inset-left, 0px));
+            padding-right: max(12px, env(safe-area-inset-right, 0px));
+            padding-block: 12px 20px;
+        }
+
+        .ph {
+            margin-bottom: 8px;
+        }
+
+        .ph-title {
+            font: 700 clamp(20px, 5vw, 28px)/1 'Barlow Condensed', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: .02em;
+        }
+
+        .ph-title em {
+            color: var(--accent);
+            font-style: normal;
+        }
+
+        .ph-sub {
+            font-size: 10px;
+            color: var(--fg2);
+            margin-top: 2px;
+        }
+
+        .roster {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 10px;
+            margin-bottom: 8px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            max-width: 600px;
+        }
+
+        .roster-hd {
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            color: var(--fg2);
+        }
+
+        .rc {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 9px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .tbl-wrap {
+            max-width: 600px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead th {
+            background: var(--surface2);
+            padding: 6px 10px;
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            color: var(--fg2);
+            border-bottom: 1px solid var(--border);
+            text-align: left;
+        }
+
+        thead th:nth-child(2) {
+            text-align: center;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid var(--border);
+        }
+
+        tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        td {
+            padding: 6px 10px;
+            vertical-align: middle;
+        }
+
+        .col-ev {
+            width: 1%;
+            white-space: nowrap;
+        }
+
+        .ev-num {
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: var(--accent);
+            display: block;
+            margin-bottom: 1px;
+        }
+
+        .ev-name {
+            font: 700 15px/1 'Barlow Condensed', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: .03em;
+        }
+
+        .col-rules {
+            width: 130px;
+        }
+
+        .rule-val {
+            display: block;
+            width: 100%;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid transparent;
+            padding: 1px 0;
+            font-size: 11px;
+            line-height: 1.4;
+            color: var(--fg);
+            font-family: 'DM Sans', sans-serif;
+            cursor: text;
+            transition: border-color .13s;
+        }
+
+        .rule-val:focus {
+            outline: none;
+            border-bottom-color: var(--accent);
+        }
+
+        .rule-val::placeholder {
+            color: var(--fg2);
+            opacity: .45;
+        }
+
+        .col-lineup {}
+
+        .lineup-wrap {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            align-items: center;
+        }
+
+        .chips {
+            display: contents;
+        }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            padding: 3px 5px 3px 6px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: grab;
+            user-select: none;
+            border: none;
+            line-height: 1;
+            transition: box-shadow .12s;
+        }
+
+        .chip:active {
+            cursor: grabbing;
+        }
+
+        .chip.sortable-ghost {
+            opacity: .3;
+        }
+
+        .chip.sortable-chosen {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .18);
+            z-index: 1;
+        }
+
+        .chip-ord {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            font-size: 7px;
+            font-weight: 700;
+            background: rgba(0, 0, 0, .1);
+            flex-shrink: 0;
+        }
+
+        .chip-x {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(0, 0, 0, .1);
+            color: inherit;
+            font-size: 7px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            flex-shrink: 0;
+            transition: background .12s;
+            font-family: inherit;
+        }
+
+        .chip-x:hover {
+            background: rgba(0, 0, 0, .22);
+        }
+
+        .chip-ghost {
+            display: inline-flex;
+            align-items: center;
+            padding: 3px 7px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1.5px dashed var(--border);
+            color: var(--fg2);
+            background: transparent;
+            line-height: 1;
+            transition: border-color .12s, color .12s;
+        }
+
+        .chip-ghost:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .c0 {
+            background: var(--c0b);
+            color: var(--c0);
+        }
+
+        .c1 {
+            background: var(--c1b);
+            color: var(--c1);
+        }
+
+        .c2 {
+            background: var(--c2b);
+            color: var(--c2);
+        }
+
+        .c3 {
+            background: var(--c3b);
+            color: var(--c3);
+        }
+
+        .actions {
+            margin-top: 8px;
+            display: flex;
+            gap: 7px;
+            max-width: 600px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 7px 14px;
+            border-radius: 7px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1.5px solid var(--border);
+            background: transparent;
+            color: var(--fg2);
+            font-family: 'DM Sans', sans-serif;
+            transition: opacity .13s;
+        }
+
+        .btn:hover {
+            opacity: .75;
+        }
+
+        #toast {
+            position: fixed;
+            bottom: max(16px, env(safe-area-inset-bottom, 0px));
+            left: 50%;
+            transform: translateX(-50%) translateY(60px);
+            background: var(--fg);
+            color: var(--bg);
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+            transition: transform .25s cubic-bezier(.16, 1, .3, 1);
+            z-index: 100;
+        }
+
+        #toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="ph">
+        <h1 class="ph-title">棒次<em>配置</em></h1>
+        <p class="ph-sub">台中鋼鐵大賽 推廣組 · 拖曳調整棒次順序 · 點 × 移除 · 點灰色名字加入</p>
+    </div>
+
+    <div class="roster" id="roster"></div>
+
+    <div class="tbl-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>項目</th>
+                    <th>重量 ／ 趟數</th>
+                    <th>棒次</th>
+                </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+        </table>
+    </div>
+
+    <div class="actions">
+        <button class="btn" id="copy-btn" onclick="copyLineup()">📋 複製棒次</button>
+        <button class="btn" id="reset-btn" onclick="resetLineup()">↺ 重置預設</button>
+    </div>
+
+    <div id="toast"></div>
+
+    <script>
+        const MEMBERS = [
+            { id: 0, name: '周逼', cls: 'c0' },
+            { id: 1, name: '怡潔', cls: 'c1' },
+            { id: 2, name: '黃哥', cls: 'c2' },
+            { id: 3, name: '怡靜', cls: 'c3' },
+        ];
+
+        const DEFAULTS = [
+            { id: 'sandbag', name: '沙袋', members: [0, 2, 1], reps: '16m × 6 趟', weight: '75 lbs（混合）' },
+            { id: 'burpee', name: '波比跳', members: [1, 0, 2, 3], reps: '30 下', weight: '跨低平行槓' },
+            { id: 'yoke', name: '龍門架', members: [0, 2, 3], reps: '16m × 3 趟', weight: '80 kg（混合）' },
+            { id: 'fan', name: '風扇車', members: [2, 3], reps: '累積 30 Cal', weight: '達標舉手換站' },
+            { id: 'farmer', name: '農夫走路', members: [0, 1, 2, 3], reps: '16m × 9 趟', weight: '2 × 16 kg（混合）' },
+            { id: 'squat', name: '深蹲', members: [0, 1], reps: '30 下', weight: '徒手至藥球' },
+            { id: 'run', name: '1400M', members: [0, 1, 2, 3], reps: '全隊同跑', weight: '—' },
+        ];
+
+        let state = clone(DEFAULTS);
+        let resetPending = false, resetTid;
+
+        function clone(x) { return JSON.parse(JSON.stringify(x)); }
+
+        function load() {
+            try { const s = localStorage.getItem('steel-lineup-v4'); if (s) state = JSON.parse(s); } catch (_) { }
+        }
+        function save() {
+            try { localStorage.setItem('steel-lineup-v4', JSON.stringify(state)); } catch (_) { }
+        }
+
+        function renderRoster() {
+            const el = document.getElementById('roster');
+            el.innerHTML = '<span class="roster-hd">隊員</span>';
+            MEMBERS.forEach(m => {
+                const c = document.createElement('span');
+                c.className = 'rc ' + m.cls;
+                c.textContent = m.name;
+                el.appendChild(c);
+            });
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('tbody');
+            tbody.innerHTML = '';
+
+            state.forEach((ev, ei) => {
+                const tr = document.createElement('tr');
+
+                const tdEv = document.createElement('td');
+                tdEv.className = 'col-ev';
+                tdEv.innerHTML = `<span class="ev-num">${ei + 1}</span><span class="ev-name">${ev.name}</span>`;
+                tr.appendChild(tdEv);
+
+                const tdRules = document.createElement('td');
+                tdRules.className = 'col-rules';
+                const rIn = document.createElement('input');
+                rIn.className = 'rule-val'; rIn.type = 'text';
+                rIn.placeholder = '趟數'; rIn.value = ev.reps || '';
+                rIn.addEventListener('input', e => { state[ei].reps = e.target.value; save(); });
+                const wIn = document.createElement('input');
+                wIn.className = 'rule-val'; wIn.type = 'text';
+                wIn.placeholder = '重量'; wIn.value = ev.weight || '';
+                wIn.addEventListener('input', e => { state[ei].weight = e.target.value; save(); });
+                tdRules.appendChild(rIn);
+                tdRules.appendChild(wIn);
+                tr.appendChild(tdRules);
+
+                const tdLineup = document.createElement('td');
+                tdLineup.className = 'col-lineup';
+
+                const wrap = document.createElement('div');
+                wrap.className = 'lineup-wrap';
+
+                const chipsDiv = document.createElement('div');
+                chipsDiv.className = 'chips';
+                chipsDiv.id = 'chips-' + ev.id;
+                chipsDiv.style.cssText = 'display:inline-flex;flex-wrap:wrap;gap:4px;align-items:center;';
+
+                ev.members.forEach(mid => chipsDiv.appendChild(makeChip(MEMBERS[mid], ei)));
+                wrap.appendChild(chipsDiv);
+
+                MEMBERS.filter(m => !ev.members.includes(m.id)).forEach(m => {
+                    const ghost = document.createElement('div');
+                    ghost.className = 'chip-ghost';
+                    ghost.textContent = '＋' + m.name;
+                    ghost.onclick = () => { state[ei].members.push(m.id); save(); renderTable(); };
+                    wrap.appendChild(ghost);
+                });
+
+                tdLineup.appendChild(wrap);
+                tr.appendChild(tdLineup);
+                tbody.appendChild(tr);
+
+                Sortable.create(chipsDiv, {
+                    animation: 130,
+                    ghostClass: 'sortable-ghost',
+                    chosenClass: 'sortable-chosen',
+                    onEnd() {
+                        const order = [...chipsDiv.querySelectorAll('.chip')].map(el => +el.dataset.mid);
+                        state[ei].members = order;
+                        save();
+                        chipsDiv.querySelectorAll('.chip-ord').forEach((el, i) => { el.textContent = i + 1; });
+                    }
+                });
+            });
+        }
+
+        function makeChip(m, ei) {
+            const ord = state[ei].members.indexOf(m.id) + 1;
+            const chip = document.createElement('div');
+            chip.className = 'chip ' + m.cls;
+            chip.dataset.mid = m.id;
+            chip.title = '拖曳調整棒次';
+
+            const ordEl = document.createElement('span');
+            ordEl.className = 'chip-ord';
+            ordEl.textContent = ord;
+
+            const nameEl = document.createElement('span');
+            nameEl.textContent = m.name;
+
+            const xEl = document.createElement('button');
+            xEl.className = 'chip-x';
+            xEl.textContent = '×';
+            xEl.title = `移除 ${m.name}`;
+            xEl.onclick = e => {
+                e.stopPropagation();
+                state[ei].members = state[ei].members.filter(id => id !== m.id);
+                save(); renderTable();
+            };
+
+            chip.appendChild(ordEl);
+            chip.appendChild(nameEl);
+            chip.appendChild(xEl);
+            return chip;
+        }
+
+        function copyLineup() {
+            const lines = ['🏋️ 鋼鐵大賽棒次（推廣組）\n'];
+            state.forEach((ev, i) => {
+                const names = ev.members.map(id => MEMBERS[id].name).join('、') || '（未配置）';
+                const notes = [ev.reps, ev.weight].filter(s => s && s !== '—').join(' ／ ');
+                lines.push(`第${i + 1}關 ${ev.name}：${names}` + (notes ? `\n   ${notes}` : ''));
+            });
+            navigator.clipboard.writeText(lines.join('\n'))
+                .then(() => toast('✓ 已複製棒次'))
+                .catch(() => toast('複製失敗，請手動選取'));
+        }
+
+        let toastTid;
+        function toast(msg) {
+            const el = document.getElementById('toast');
+            el.textContent = msg;
+            el.classList.add('show');
+            clearTimeout(toastTid);
+            toastTid = setTimeout(() => el.classList.remove('show'), 2500);
+        }
+
+        function resetLineup() {
+            const btn = document.getElementById('reset-btn');
+            if (!resetPending) {
+                resetPending = true;
+                btn.textContent = '再按確認';
+                btn.style.color = 'var(--accent)';
+                resetTid = setTimeout(() => {
+                    resetPending = false;
+                    btn.textContent = '↺ 重置預設';
+                    btn.style.color = '';
+                }, 3000);
+            } else {
+                clearTimeout(resetTid);
+                resetPending = false;
+                btn.textContent = '↺ 重置預設';
+                btn.style.color = '';
+                state = clone(DEFAULTS);
+                save(); renderTable();
+                toast('已還原為預設棒次');
+            }
+        }
+
+        load();
+        renderRoster();
+        renderTable();
+    </script>
+</body>
+
+</html>
